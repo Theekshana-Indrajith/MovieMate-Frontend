@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert, SafeAreaView, Platform, StatusBar } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import * as ImagePicker from 'expo-image-picker';
 import { AuthContext } from '../context/AuthContext';
@@ -15,6 +16,14 @@ const EditMovieScreen = ({ route, navigation }) => {
     const [description, setDescription] = useState(movie.description);
     const [duration, setDuration] = useState(movie.duration.toString());
     const [releaseDate, setReleaseDate] = useState(new Date(movie.releaseDate).toISOString().split('T')[0]);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            setReleaseDate(selectedDate.toISOString().split('T')[0]);
+        }
+    };
 
     // Multi-Image Support
     const [poster, setPoster] = useState({ uri: `${BASE_URL}/uploads/movies/${movie.poster}`, old: true });
@@ -77,6 +86,16 @@ const EditMovieScreen = ({ route, navigation }) => {
 
         if (!title || !description || selectedGenres.length === 0) {
             Alert.alert('Error', 'Please fill in all required fields');
+            return;
+        }
+
+        if (title.trim().length < 2) {
+            Alert.alert('Invalid Title', 'Movie title must be at least 2 characters long.');
+            return;
+        }
+
+        if (/^\d+$/.test(title.trim())) {
+            Alert.alert('Invalid Title', 'Movie title cannot be just numbers.');
             return;
         }
 
@@ -180,8 +199,25 @@ const EditMovieScreen = ({ route, navigation }) => {
                     </View>
 
                     <View style={styles.row}>
-                        <View style={{ flex: 1, marginRight: 15 }}><Text style={styles.inputLabel}>Duration</Text><TextInput style={styles.input} value={duration} onChangeText={setDuration} keyboardType="numeric" placeholderTextColor="#475569" /></View>
-                        <View style={{ flex: 1 }}><Text style={styles.inputLabel}>Release Date</Text><TextInput style={styles.input} value={releaseDate} onChangeText={setReleaseDate} placeholderTextColor="#475569" /></View>
+                        <View style={{ flex: 1, marginRight: 15 }}>
+                            <Text style={styles.inputLabel}>Duration (mins)</Text>
+                            <TextInput style={styles.input} value={duration} onChangeText={setDuration} keyboardType="numeric" placeholderTextColor="#475569" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={styles.inputLabel}>Release Date</Text>
+                            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, { justifyContent: 'center' }]}>
+                                <Text style={{ color: '#fff' }}>{releaseDate}</Text>
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={new Date(releaseDate)}
+                                    mode="date"
+                                    display="default"
+                                    minimumDate={new Date()} // Prevent past dates
+                                    onChange={onDateChange}
+                                />
+                            )}
+                        </View>
                     </View>
 
                     <Text style={styles.inputLabel}>Cast & Crew</Text>
