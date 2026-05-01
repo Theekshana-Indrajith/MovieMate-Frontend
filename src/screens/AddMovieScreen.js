@@ -210,17 +210,23 @@ const AddMovieScreen = ({ navigation }) => {
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.inputLabel}>Release</Text>
-                            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, { justifyContent: 'center' }]}>
-                                <Text style={{ color: '#fff' }}>{releaseDate}</Text>
-                            </TouchableOpacity>
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    value={new Date(releaseDate)}
-                                    mode="date"
-                                    display="default"
-                                    minimumDate={new Date()} // Prevent past dates
-                                    onChange={onDateChange}
-                                />
+                            {Platform.OS === 'web' ? (
+                                <TextInput style={styles.input} value={releaseDate} onChangeText={setReleaseDate} placeholder="YYYY-MM-DD" placeholderTextColor="#475569" />
+                            ) : (
+                                <>
+                                    <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.input, { justifyContent: 'center' }]}>
+                                        <Text style={{ color: '#fff' }}>{releaseDate}</Text>
+                                    </TouchableOpacity>
+                                    {showDatePicker && (
+                                        <DateTimePicker
+                                            value={new Date(releaseDate)}
+                                            mode="date"
+                                            display="default"
+                                            minimumDate={new Date()} // Prevent past dates
+                                            onChange={onDateChange}
+                                        />
+                                    )}
+                                </>
                             )}
                         </View>
                     </View>

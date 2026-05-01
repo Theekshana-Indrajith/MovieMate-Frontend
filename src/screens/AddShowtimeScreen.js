@@ -153,34 +153,52 @@ const AddShowtimeScreen = ({ navigation }) => {
                     <View style={styles.row}>
                         <View style={{ flex: 1, marginRight: 10 }}>
                             <Text style={styles.inputLabel}>Start Date</Text>
-                            <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowDatePicker(true)}>
-                                <Calendar color="#64748B" size={18} />
-                                <Text style={[styles.input, { color: date ? '#fff' : '#475569' }]}>{date || 'Select Date'}</Text>
-                            </TouchableOpacity>
-                            {showDatePicker && (
-                                <DateTimePicker
-                                    value={date ? new Date(date) : new Date()}
-                                    mode="date"
-                                    display="default"
-                                    minimumDate={new Date()}
-                                    onChange={onDateChange}
-                                />
+                            {Platform.OS === 'web' ? (
+                                <View style={styles.inputWrapper}>
+                                    <Calendar color="#64748B" size={18} />
+                                    <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="2026-04-12" placeholderTextColor="#475569" />
+                                </View>
+                            ) : (
+                                <>
+                                    <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowDatePicker(true)}>
+                                        <Calendar color="#64748B" size={18} />
+                                        <Text style={[styles.input, { color: date ? '#fff' : '#475569' }]}>{date || 'Select Date'}</Text>
+                                    </TouchableOpacity>
+                                    {showDatePicker && (
+                                        <DateTimePicker
+                                            value={date ? new Date(date) : new Date()}
+                                            mode="date"
+                                            display="default"
+                                            minimumDate={new Date()}
+                                            onChange={onDateChange}
+                                        />
+                                    )}
+                                </>
                             )}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.inputLabel}>End Date (Opt)</Text>
-                            <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowEndDatePicker(true)}>
-                                <Calendar color="#64748B" size={18} />
-                                <Text style={[styles.input, { color: endDate ? '#fff' : '#475569' }]}>{endDate || 'Optional'}</Text>
-                            </TouchableOpacity>
-                            {showEndDatePicker && (
-                                <DateTimePicker
-                                    value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
-                                    mode="date"
-                                    display="default"
-                                    minimumDate={date ? new Date(date) : new Date()}
-                                    onChange={onEndDateChange}
-                                />
+                            {Platform.OS === 'web' ? (
+                                <View style={styles.inputWrapper}>
+                                    <Calendar color="#64748B" size={18} />
+                                    <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="2026-04-16" placeholderTextColor="#475569" />
+                                </View>
+                            ) : (
+                                <>
+                                    <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowEndDatePicker(true)}>
+                                        <Calendar color="#64748B" size={18} />
+                                        <Text style={[styles.input, { color: endDate ? '#fff' : '#475569' }]}>{endDate || 'Optional'}</Text>
+                                    </TouchableOpacity>
+                                    {showEndDatePicker && (
+                                        <DateTimePicker
+                                            value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
+                                            mode="date"
+                                            display="default"
+                                            minimumDate={date ? new Date(date) : new Date()}
+                                            onChange={onEndDateChange}
+                                        />
+                                    )}
+                                </>
                             )}
                         </View>
                     </View>

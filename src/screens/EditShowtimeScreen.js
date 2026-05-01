@@ -143,32 +143,44 @@ const EditShowtimeScreen = ({ route, navigation }) => {
                 <View style={{ flexDirection: 'row', gap: 10 }}>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.label}>Date *</Text>
-                        <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowDatePicker(true)}>
-                            <Text style={{ color: date ? '#fff' : '#64748B' }}>{date || 'Select Date'}</Text>
-                        </TouchableOpacity>
-                        {showDatePicker && (
-                            <DateTimePicker
-                                value={date ? new Date(date) : new Date()}
-                                mode="date"
-                                display="default"
-                                minimumDate={new Date()}
-                                onChange={onDateChange}
-                            />
+                        {Platform.OS === 'web' ? (
+                            <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="2026-04-12" placeholderTextColor="#64748B" />
+                        ) : (
+                            <>
+                                <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowDatePicker(true)}>
+                                    <Text style={{ color: date ? '#fff' : '#64748B' }}>{date || 'Select Date'}</Text>
+                                </TouchableOpacity>
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        value={date ? new Date(date) : new Date()}
+                                        mode="date"
+                                        display="default"
+                                        minimumDate={new Date()}
+                                        onChange={onDateChange}
+                                    />
+                                )}
+                            </>
                         )}
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.label}>Extend Until (Opt)</Text>
-                        <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowEndDatePicker(true)}>
-                            <Text style={{ color: endDate ? '#fff' : '#64748B' }}>{endDate || '2026-04-16'}</Text>
-                        </TouchableOpacity>
-                        {showEndDatePicker && (
-                            <DateTimePicker
-                                value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
-                                mode="date"
-                                display="default"
-                                minimumDate={date ? new Date(date) : new Date()}
-                                onChange={onEndDateChange}
-                            />
+                        {Platform.OS === 'web' ? (
+                            <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="2026-04-16" placeholderTextColor="#64748B" />
+                        ) : (
+                            <>
+                                <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowEndDatePicker(true)}>
+                                    <Text style={{ color: endDate ? '#fff' : '#64748B' }}>{endDate || '2026-04-16'}</Text>
+                                </TouchableOpacity>
+                                {showEndDatePicker && (
+                                    <DateTimePicker
+                                        value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
+                                        mode="date"
+                                        display="default"
+                                        minimumDate={date ? new Date(date) : new Date()}
+                                        onChange={onEndDateChange}
+                                    />
+                                )}
+                            </>
                         )}
                     </View>
                 </View>
