@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, SafeAreaView, ActivityIndicator, Platform, StatusBar } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { AuthContext } from '../context/AuthContext';
 import api from '../utils/api';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,6 +16,22 @@ const EditShowtimeScreen = ({ route, navigation }) => {
     const [selectedMovie, setSelectedMovie] = useState(showtime.movie?._id || showtime.movie);
     const [date, setDate] = useState(new Date(showtime.date).toISOString().split('T')[0]);
     const [endDate, setEndDate] = useState(''); // Allow extending
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (event.type === 'set' && selectedDate) {
+            setDate(selectedDate.toISOString().split('T')[0]);
+        }
+    };
+
+    const onEndDateChange = (event, selectedDate) => {
+        setShowEndDatePicker(false);
+        if (event.type === 'set' && selectedDate) {
+            setEndDate(selectedDate.toISOString().split('T')[0]);
+        }
+    };
     const [times, setTimes] = useState(showtime.times.join(', '));
     const [price, setPrice] = useState(showtime.ticketPrice.toString());
     const [image, setImage] = useState(showtime.image ? { uri: `${BASE_URL}/uploads/showtimes/${showtime.image}`, isRemote: true } : null);
@@ -126,11 +143,33 @@ const EditShowtimeScreen = ({ route, navigation }) => {
                 <View style={{ flexDirection: 'row', gap: 10 }}>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.label}>Date *</Text>
-                        <TextInput style={styles.input} value={date} onChangeText={setDate} placeholderTextColor="#64748B" />
+                        <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowDatePicker(true)}>
+                            <Text style={{ color: date ? '#fff' : '#64748B' }}>{date || 'Select Date'}</Text>
+                        </TouchableOpacity>
+                        {showDatePicker && (
+                            <DateTimePicker
+                                value={date ? new Date(date) : new Date()}
+                                mode="date"
+                                display="default"
+                                minimumDate={new Date()}
+                                onChange={onDateChange}
+                            />
+                        )}
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.label}>Extend Until (Opt)</Text>
-                        <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="2026-04-16" placeholderTextColor="#64748B" />
+                        <TouchableOpacity style={[styles.input, { justifyContent: 'center' }]} onPress={() => setShowEndDatePicker(true)}>
+                            <Text style={{ color: endDate ? '#fff' : '#64748B' }}>{endDate || '2026-04-16'}</Text>
+                        </TouchableOpacity>
+                        {showEndDatePicker && (
+                            <DateTimePicker
+                                value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
+                                mode="date"
+                                display="default"
+                                minimumDate={date ? new Date(date) : new Date()}
+                                onChange={onEndDateChange}
+                            />
+                        )}
                     </View>
                 </View>
                 <Text style={{ color: '#64748B', fontSize: 12, marginBottom: 20, marginTop: -15, marginLeft: 5 }}>

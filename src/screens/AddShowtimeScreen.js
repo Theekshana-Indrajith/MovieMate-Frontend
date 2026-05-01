@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert, SafeAreaView, ActivityIndicator, Platform, StatusBar } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { AuthContext } from '../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../utils/api';
@@ -12,6 +13,22 @@ const AddShowtimeScreen = ({ navigation }) => {
     const [selectedMovie, setSelectedMovie] = useState('');
     const [date, setDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+
+    const onDateChange = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (event.type === 'set' && selectedDate) {
+            setDate(selectedDate.toISOString().split('T')[0]);
+        }
+    };
+
+    const onEndDateChange = (event, selectedDate) => {
+        setShowEndDatePicker(false);
+        if (event.type === 'set' && selectedDate) {
+            setEndDate(selectedDate.toISOString().split('T')[0]);
+        }
+    };
     const [times, setTimes] = useState('');
     const [price, setPrice] = useState('');
     const [image, setImage] = useState(null);
@@ -29,15 +46,7 @@ const AddShowtimeScreen = ({ navigation }) => {
             });
     }, []);
 
-    const validateDate = (dateStr) => {
-        const reg = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateStr.match(reg)) return false;
-
-        const inputDate = new Date(dateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return inputDate >= today;
-    };
+    // Removed manual validateDate as DateTimePicker prevents invalid formats
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
@@ -55,10 +64,7 @@ const AddShowtimeScreen = ({ navigation }) => {
             return;
         }
 
-        if (!validateDate(date)) {
-            Alert.alert('Invalid Date', 'Please enter a current or future date (YYYY-MM-DD).');
-            return;
-        }
+        // Date is handled by picker
 
         if (isNaN(Number(price)) || Number(price) <= 0) {
             Alert.alert('Invalid Price', 'Please enter a valid ticket price.');
@@ -147,17 +153,35 @@ const AddShowtimeScreen = ({ navigation }) => {
                     <View style={styles.row}>
                         <View style={{ flex: 1, marginRight: 10 }}>
                             <Text style={styles.inputLabel}>Start Date</Text>
-                            <View style={styles.inputWrapper}>
+                            <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowDatePicker(true)}>
                                 <Calendar color="#64748B" size={18} />
-                                <TextInput style={styles.input} value={date} onChangeText={setDate} placeholder="2026-04-12" placeholderTextColor="#475569" />
-                            </View>
+                                <Text style={[styles.input, { color: date ? '#fff' : '#475569' }]}>{date || 'Select Date'}</Text>
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={date ? new Date(date) : new Date()}
+                                    mode="date"
+                                    display="default"
+                                    minimumDate={new Date()}
+                                    onChange={onDateChange}
+                                />
+                            )}
                         </View>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.inputLabel}>End Date (Opt)</Text>
-                            <View style={styles.inputWrapper}>
+                            <TouchableOpacity style={styles.inputWrapper} onPress={() => setShowEndDatePicker(true)}>
                                 <Calendar color="#64748B" size={18} />
-                                <TextInput style={styles.input} value={endDate} onChangeText={setEndDate} placeholder="2026-04-16" placeholderTextColor="#475569" />
-                            </View>
+                                <Text style={[styles.input, { color: endDate ? '#fff' : '#475569' }]}>{endDate || 'Optional'}</Text>
+                            </TouchableOpacity>
+                            {showEndDatePicker && (
+                                <DateTimePicker
+                                    value={endDate ? new Date(endDate) : (date ? new Date(date) : new Date())}
+                                    mode="date"
+                                    display="default"
+                                    minimumDate={date ? new Date(date) : new Date()}
+                                    onChange={onEndDateChange}
+                                />
+                            )}
                         </View>
                     </View>
 
