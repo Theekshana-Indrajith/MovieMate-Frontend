@@ -84,43 +84,66 @@ const AdminSeatViewScreen = ({ route, navigation }) => {
                     </View>
                 ) : (
                     <View style={styles.seatGrid}>
-                        {seats.map(seat => {
-                            let bgColor = '#1E293B'; // Available
-                            let borderColor = '#334155';
-                            let textColor = '#94A3B8';
+                        {Array.from(new Set(seats.map(s => s.id.split('-')[0]))).map(rowCode => {
+                            const rowSeats = seats.filter(s => s.id.split('-')[0] === rowCode);
+                            const midPoint = Math.ceil(rowSeats.length / 2);
 
-                            if (seat.status === 'booked') {
-                                bgColor = '#334155'; // General booked
-                                textColor = '#64748B';
-                            } else if (seat.status === 'maintenance') {
-                                bgColor = 'rgba(239, 68, 68, 0.1)'; 
-                                borderColor = '#EF4444';
-                                textColor = '#EF4444';
-                            } else if (seat.status === 'this_booking') {
-                                bgColor = '#10B981'; // Green for this booking
-                                borderColor = '#10B981';
-                                textColor = '#fff';
-                            } else if (seat.type === 'VIP') {
-                                bgColor = 'rgba(245, 158, 11, 0.1)'; 
-                                borderColor = '#F59E0B';
-                            }
+                            const renderSeat = (seat) => {
+                                let bgColor = '#1E293B'; // Available
+                                let borderColor = '#334155';
+                                let textColor = '#94A3B8';
+
+                                if (seat.status === 'booked') {
+                                    bgColor = '#334155'; // General booked
+                                    textColor = '#64748B';
+                                } else if (seat.status === 'maintenance') {
+                                    bgColor = 'rgba(239, 68, 68, 0.1)'; 
+                                    borderColor = '#EF4444';
+                                    textColor = '#EF4444';
+                                } else if (seat.status === 'this_booking') {
+                                    bgColor = '#10B981'; // Green for this booking
+                                    borderColor = '#10B981';
+                                    textColor = '#fff';
+                                } else if (seat.type === 'VIP') {
+                                    bgColor = 'rgba(245, 158, 11, 0.1)'; 
+                                    borderColor = '#F59E0B';
+                                }
+
+                                return (
+                                    <View
+                                        key={seat.id}
+                                        style={[
+                                            styles.seat, 
+                                            { backgroundColor: bgColor, borderColor: borderColor },
+                                            seat.status === 'maintenance' && { borderStyle: 'dashed' }
+                                        ]}
+                                    >
+                                        <View>
+                                            {seat.status === 'maintenance' && (
+                                                <View style={{ position: 'absolute', width: '140%', height: 2, backgroundColor: '#EF4444', transform: [{ rotate: '-45deg' }], zIndex: 1, left: '-20%', top: '45%' }} />
+                                            )}
+                                            <Text style={[styles.seatText, { color: textColor }, seat.status === 'this_booking' && { fontWeight: 'bold' }]}>
+                                                {seat.id.split('-')[1]}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                );
+                            };
 
                             return (
-                                <View
-                                    key={seat.id}
-                                    style={[
-                                        styles.seat, 
-                                        { backgroundColor: bgColor, borderColor: borderColor },
-                                        seat.status === 'maintenance' && { borderStyle: 'dashed' }
-                                    ]}
-                                >
-                                    <View>
-                                        {seat.status === 'maintenance' && (
-                                            <View style={{ position: 'absolute', width: '140%', height: 2, backgroundColor: '#EF4444', transform: [{ rotate: '-45deg' }], zIndex: 1, left: '-20%', top: '45%' }} />
-                                        )}
-                                        <Text style={[styles.seatText, { color: textColor }, seat.status === 'this_booking' && { fontWeight: 'bold' }]}>
-                                            {seat.id.replace('-', '')}
-                                        </Text>
+                                <View key={rowCode} style={styles.rowContainer}>
+                                    <View style={styles.rowCodeContainer}>
+                                        <Text style={styles.rowCodeText}>{rowCode}</Text>
+                                    </View>
+                                    <View style={styles.seatHalf}>
+                                        {rowSeats.slice(0, midPoint).map(seat => renderSeat(seat))}
+                                    </View>
+                                    <View style={styles.aisle} />
+                                    <View style={styles.seatHalf}>
+                                        {rowSeats.slice(midPoint).map(seat => renderSeat(seat))}
+                                    </View>
+                                    <View style={styles.rowCodeContainerRight}>
+                                        <Text style={styles.rowCodeText}>{rowCode}</Text>
                                     </View>
                                 </View>
                             );
@@ -169,8 +192,14 @@ const styles = StyleSheet.create({
     screenIndicator: { alignItems: 'center', marginBottom: 40, marginTop: 20 },
     screenVector: { width: '80%', height: 5, backgroundColor: '#3B82F6', borderRadius: 10, ...Platform.select({ web: { boxShadow: '0px 10px 20px rgba(59, 130, 246, 0.5)' }, default: { shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 20, elevation: 10 }}) },
     screenText: { color: '#64748B', marginTop: 10, fontSize: 12, letterSpacing: 5 },
-    seatGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10 },
-    seat: { width: 45, height: 45, borderWidth: 1, borderRadius: 10, justifyContent: 'center', alignItems: 'center', margin: 5 },
+    seatGrid: { alignItems: 'center' },
+    rowContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    rowCodeContainer: { width: 25, alignItems: 'center', marginRight: 5 },
+    rowCodeContainerRight: { width: 25, alignItems: 'center', marginLeft: 5 },
+    rowCodeText: { color: '#64748B', fontWeight: 'bold', fontSize: 14 },
+    seatHalf: { flexDirection: 'row' },
+    aisle: { width: 30 },
+    seat: { width: 38, height: 38, borderWidth: 1, borderRadius: 8, justifyContent: 'center', alignItems: 'center', margin: 4 },
     seatText: { fontSize: 11, fontWeight: 'bold' },
     legend: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 40, marginBottom: 30, gap: 15 },
     legendItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 10, marginBottom: 10 },

@@ -147,49 +147,72 @@ const SeatSelectionScreen = ({ route, navigation }) => {
                     </View>
                 ) : (
                     <View style={styles.seatGrid}>
-                        {seats.map(seat => {
-                            const isSelected = selectedSeats.find(s => s.id === seat.id);
-                            let bgColor = '#1E293B'; // Available
-                            let borderColor = '#334155';
+                        {Array.from(new Set(seats.map(s => s.id.split('-')[0]))).map(rowCode => {
+                            const rowSeats = seats.filter(s => s.id.split('-')[0] === rowCode);
+                            const midPoint = Math.ceil(rowSeats.length / 2);
 
-                            if (seat.status === 'booked') {
-                                bgColor = '#334155'; // Booked
-                            } else if (seat.status === 'maintenance') {
-                                bgColor = 'rgba(239, 68, 68, 0.1)'; // Maintenance red tint
-                                borderColor = '#EF4444';
-                            } else if (isSelected) {
-                                bgColor = '#3B82F6'; // Selected
-                                borderColor = '#3B82F6';
-                            } else if (seat.type === 'VIP') {
-                                bgColor = 'rgba(245, 158, 11, 0.1)'; // VIP Gold tint
-                                borderColor = '#F59E0B';
-                            }
+                            const renderSeat = (seat) => {
+                                const isSelected = selectedSeats.find(s => s.id === seat.id);
+                                let bgColor = '#1E293B'; // Available
+                                let borderColor = '#334155';
+
+                                if (seat.status === 'booked') {
+                                    bgColor = '#334155'; // Booked
+                                } else if (seat.status === 'maintenance') {
+                                    bgColor = 'rgba(239, 68, 68, 0.1)'; // Maintenance red tint
+                                    borderColor = '#EF4444';
+                                } else if (isSelected) {
+                                    bgColor = '#3B82F6'; // Selected
+                                    borderColor = '#3B82F6';
+                                } else if (seat.type === 'VIP') {
+                                    bgColor = 'rgba(245, 158, 11, 0.1)'; // VIP Gold tint
+                                    borderColor = '#F59E0B';
+                                }
+
+                                return (
+                                    <TouchableOpacity
+                                        key={seat.id}
+                                        style={[
+                                            styles.seat, 
+                                            { backgroundColor: bgColor, borderColor: borderColor },
+                                            seat.status === 'maintenance' && { borderStyle: 'dashed' }
+                                        ]}
+                                        onPress={() => toggleSeat(seat)}
+                                        activeOpacity={0.7}
+                                    >
+                                        <View>
+                                            {seat.status === 'maintenance' && (
+                                                <View style={{ position: 'absolute', width: '140%', height: 2, backgroundColor: '#EF4444', transform: [{ rotate: '-45deg' }], zIndex: 1, left: '-20%', top: '45%' }} />
+                                            )}
+                                            <Text style={[
+                                                styles.seatText, 
+                                                seat.status === 'booked' && { color: '#64748B' },
+                                                seat.status === 'maintenance' && { color: '#EF4444' },
+                                                isSelected && { color: '#fff', fontWeight: 'bold' }
+                                            ]}>
+                                                {seat.id.split('-')[1]}
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            };
 
                             return (
-                                <TouchableOpacity
-                                    key={seat.id}
-                                    style={[
-                                        styles.seat, 
-                                        { backgroundColor: bgColor, borderColor: borderColor },
-                                        seat.status === 'maintenance' && { borderStyle: 'dashed' }
-                                    ]}
-                                    onPress={() => toggleSeat(seat)}
-                                    activeOpacity={0.7}
-                                >
-                                    <View>
-                                        {seat.status === 'maintenance' && (
-                                            <View style={{ position: 'absolute', width: '140%', height: 2, backgroundColor: '#EF4444', transform: [{ rotate: '-45deg' }], zIndex: 1, left: '-20%', top: '45%' }} />
-                                        )}
-                                        <Text style={[
-                                            styles.seatText, 
-                                            seat.status === 'booked' && { color: '#64748B' },
-                                            seat.status === 'maintenance' && { color: '#EF4444' },
-                                            isSelected && { color: '#fff', fontWeight: 'bold' }
-                                        ]}>
-                                            {seat.id.split('-')[1]}
-                                        </Text>
+                                <View key={rowCode} style={styles.rowContainer}>
+                                    <View style={styles.rowCodeContainer}>
+                                        <Text style={styles.rowCodeText}>{rowCode}</Text>
                                     </View>
-                                </TouchableOpacity>
+                                    <View style={styles.seatHalf}>
+                                        {rowSeats.slice(0, midPoint).map(seat => renderSeat(seat))}
+                                    </View>
+                                    <View style={styles.aisle} />
+                                    <View style={styles.seatHalf}>
+                                        {rowSeats.slice(midPoint).map(seat => renderSeat(seat))}
+                                    </View>
+                                    <View style={styles.rowCodeContainerRight}>
+                                        <Text style={styles.rowCodeText}>{rowCode}</Text>
+                                    </View>
+                                </View>
                             );
                         })}
                     </View>
@@ -286,9 +309,15 @@ const styles = StyleSheet.create({
         elevation: 10
     },
     screenText: { color: '#64748B', marginTop: 10, fontSize: 12, letterSpacing: 5 },
-    seatGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
-    seat: { width: 45, height: 45, borderWidth: 1, borderRadius: 10, justifyContent: 'center', alignItems: 'center', margin: 5 },
-    seatText: { color: '#94A3B8', fontSize: 12 },
+    seatGrid: { alignItems: 'center' },
+    rowContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+    rowCodeContainer: { width: 25, alignItems: 'center', marginRight: 5 },
+    rowCodeContainerRight: { width: 25, alignItems: 'center', marginLeft: 5 },
+    rowCodeText: { color: '#64748B', fontWeight: 'bold', fontSize: 14 },
+    seatHalf: { flexDirection: 'row' },
+    aisle: { width: 30 },
+    seat: { width: 38, height: 38, borderWidth: 1, borderRadius: 8, justifyContent: 'center', alignItems: 'center', margin: 4 },
+    seatText: { color: '#94A3B8', fontSize: 11 },
     legend: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 40 },
     legendItem: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 15, marginBottom: 15 },
     legendBox: { width: 16, height: 16, borderRadius: 4, borderWidth: 1, marginRight: 8 },
