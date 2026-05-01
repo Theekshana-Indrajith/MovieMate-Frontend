@@ -171,9 +171,9 @@ const AdminSeatsScreen = ({ navigation }) => {
                     </View>
                 </View>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <View style={{ marginBottom: 16 }}>
                     <Text style={styles.sectionTitle}>Seat Rows Overview</Text>
-                    <Text style={{ color: '#64748B', fontSize: 12 }}>Long press a row to toggle Maintenance</Text>
+                    <Text style={{ color: '#64748B', fontSize: 12, marginTop: 4 }}>Long press a row to toggle Maintenance</Text>
                 </View>
 
                 {loading ? <ActivityIndicator size="large" color="#3B82F6" /> : seatLayout.map((row) => (
@@ -183,28 +183,34 @@ const AdminSeatsScreen = ({ navigation }) => {
                         onLongPress={() => handleToggleStatus(row)}
                         delayLongPress={500}
                     >
-                        <View style={styles.rowHeader}>
-                            <Armchair color={row.type === 'VIP' ? '#F59E0B' : '#3B82F6'} size={24} />
-                            <Text style={styles.rowName}>Row {row.rowCode}</Text>
-                        </View>
-                        <View style={styles.rowDetails}>
-                            {row.status === 'Maintenance' && (
-                                <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
-                                    <Text style={[styles.badgeText, { color: '#EF4444' }]}>Maintenance</Text>
-                                </View>
-                            )}
-                            <View style={styles.badge}>
-                                <Text style={[styles.badgeText, row.type === 'VIP' && { color: '#F59E0B' }]}>{row.type}</Text>
+                        <View style={styles.rowCardTop}>
+                            <View style={styles.rowHeader}>
+                                <Armchair color={row.type === 'VIP' ? '#F59E0B' : '#3B82F6'} size={24} />
+                                <Text style={styles.rowName}>Row {row.rowCode}</Text>
                             </View>
-                            <Text style={styles.detailText}>{row.seatsCount} Seats</Text>
-                            {row.type === 'VIP' && <Text style={styles.bonusText}>(+ Rs.{row.extraPrice})</Text>}
-                            
-                            <TouchableOpacity onPress={() => navigation.navigate('EditSeatRow', { row: row })} style={{ marginLeft: 15 }}>
-                                <Text style={{ color: '#3B82F6', fontSize: 18 }}>✏️</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => handleDelete(row._id)} style={{ marginLeft: 15 }}>
-                                <Trash2 color="#EF4444" size={18} />
-                            </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity onPress={() => navigation.navigate('EditSeatRow', { row: row })} style={{ marginRight: 20 }}>
+                                    <Text style={{ color: '#3B82F6', fontSize: 18 }}>✏️</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => handleDelete(row._id)}>
+                                    <Trash2 color="#EF4444" size={18} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <View style={styles.rowCardBottom}>
+                            <View style={{ flexDirection: 'row' }}>
+                                {row.status === 'Maintenance' && (
+                                    <View style={[styles.badge, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
+                                        <Text style={[styles.badgeText, { color: '#EF4444' }]}>Maintenance</Text>
+                                    </View>
+                                )}
+                                <View style={styles.badge}>
+                                    <Text style={[styles.badgeText, row.type === 'VIP' && { color: '#F59E0B' }]}>{row.type}</Text>
+                                </View>
+                            </View>
+                            <Text style={styles.detailText}>
+                                {row.seatsCount} Seats {row.type === 'VIP' && <Text style={styles.bonusText}>(+ Rs.{row.extraPrice})</Text>}
+                            </Text>
                         </View>
                     </TouchableOpacity>
                 ))}
@@ -225,14 +231,16 @@ const styles = StyleSheet.create({
     summaryCard: { backgroundColor: '#161B2E', padding: 24, borderRadius: 32, marginBottom: 30, alignItems: 'center', borderWidth: 1, borderColor: '#1F2937' },
     summaryTitle: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 8 },
     summaryText: { fontSize: 16, color: '#94A3B8' },
-    sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginBottom: 16 },
-    rowCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#161B2E', padding: 16, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: '#1F2937' },
+    sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
+    rowCard: { backgroundColor: '#161B2E', padding: 16, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: '#1F2937' },
+    rowCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    rowCardBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     rowHeader: { flexDirection: 'row', alignItems: 'center' },
     rowName: { fontSize: 16, fontWeight: 'bold', color: '#fff', marginLeft: 12 },
-    rowDetails: { flexDirection: 'row', alignItems: 'center' },
+    detailText: { color: '#94A3B8', fontSize: 13, fontWeight: 'bold' },
     badge: { backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 },
     badgeText: { fontSize: 12, fontWeight: 'bold', color: '#6366F1' },
-    bonusText: { color: '#F59E0B', fontSize: 12, marginLeft: 10 },
+    bonusText: { color: '#F59E0B', fontSize: 12 },
     assignmentHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12, backgroundColor: 'rgba(99, 102, 241, 0.1)', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10 },
     assignmentTitle: { color: '#6366F1', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', marginLeft: 6 },
     categoryRow: { flexDirection: 'row' },
